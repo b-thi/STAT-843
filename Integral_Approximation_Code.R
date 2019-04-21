@@ -2,7 +2,7 @@
 library(fda)
 
 # obtain the annual precipitation for 35 cities
-annualprec = log10(apply(daily$precav,2,sum))
+annualprec = apply(daily$precav,2,mean)
 
 # Define the 65 Fourier basis functions
 tempbasis65  = create.fourier.basis(c(0,365), 65)
@@ -17,7 +17,7 @@ templist[[2]] = temp_fd
 
 # create a constant basis for the intercept
 conbasis = create.constant.basis(c(0,365))
-nbasis = 5
+nbasis = 11
 betabasis5 = create.fourier.basis(c(0,365), nbasis)
 betalist1  = vector("list",2)
 betalist1[[1]] = conbasis
@@ -161,10 +161,10 @@ fda_integ_approximator <- function(beta_basis, func_obs, k) {
   for (j in 1:length(basis_combinations$Var1)) {
     for (i in 1:100) {
       if(grepl(paste0("sin", 100 - i), final_form[j])){
-        final_form[j] <- gsub(paste0("sin", 100 - i), paste0("sin", "(", 100 - i, "*", "x)"), final_form[j])
+        final_form[j] <- gsub(paste0("sin", 100 - i), paste0("sin", "(", 100 - i, "*", "365", "*", "x)"), final_form[j])
       }
       if(grepl(paste0("cos", 100 - i), final_form[j])){
-        final_form[j] <- gsub(paste0("cos", 100 - i), paste0("cos", "(", 100 - i, "*", "x)"), final_form[j])
+        final_form[j] <- gsub(paste0("cos", 100 - i), paste0("cos", "(", 100 - i, "*", "365", "*", "x)"), final_form[j])
       }
     }
   }
@@ -173,13 +173,13 @@ fda_integ_approximator <- function(beta_basis, func_obs, k) {
   const_calc <- updated_names[k]
   for (i in 1:100) {
     if(grepl(paste0("sin", 100 - i), const_calc)){
-      const_calc <- gsub(paste0("sin", 100 - i), paste0("sin", "(", 100 - i, "*", "x)"), const_calc)
+      const_calc <- gsub(paste0("sin", 100 - i), paste0("sin", "(", 100 - i, "*", "365", "*", "x)"), const_calc)
     }
     if(grepl(paste0("cos", 100 - i), const_calc)){
-      const_calc <- gsub(paste0("cos", 100 - i), paste0("cos", "(", 100 - i, "*", "x)"), const_calc)
+      const_calc <- gsub(paste0("cos", 100 - i), paste0("cos", "(", 100 - i, "*", "365", "*", "x)"), const_calc)
     }
   }
-
+  
   # Creating function
   const_func <- function(x){
     a = eval(parse(text = const_calc))
@@ -187,7 +187,7 @@ fda_integ_approximator <- function(beta_basis, func_obs, k) {
   }
   
   # Doing integral
-  const_int <- composite.simpson(const_func, 0, 365, 5000)
+  const_int <- composite.simpson(const_func, 0, 365, 50000)
   
   # Initializing
   integral_evals <- c()
@@ -205,6 +205,8 @@ fda_integ_approximator <- function(beta_basis, func_obs, k) {
   
   # Putting together
   final_results <- c(const_int, integral_evals)
+  
+  final_results <- c(scale(final_results))
   
   return(final_results)
   
