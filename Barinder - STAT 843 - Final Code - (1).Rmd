@@ -537,8 +537,37 @@ data.frame(yhat = neuralnet_info$output,
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
+Lastly, we can do a comparison with a regular feed-forward neural network with the same conditions as the functional neural network:
+
+```{r}
+### Neural Network Comparison
+annualprec = apply(daily$precav,2,mean)
+
+## Creating data frame
+temp_prec_df <- data.frame(cbind(annualprec, t(daily$tempav)))
+
+## Loading package
+library(neuralnet)
+
+## Scaling data
+temp_prec_df_scaled <- as.data.frame(scale(temp_prec_df))
+
+## Running neural network
+NN = neuralnet(annualprec ~ ., 
+                temp_prec_df_scaled, 
+                hidden = 1 , 
+                linear.output = T,
+               rep = 10)
+
+## Looking at error rate
+NN$result.matrix[1]
+```
+
+This error rate is higher than the one we experienced using the functional neural network (albeit slower, but also not optimized as of yet).
 
 That completes the code thus far for this type of model. This is very specific to this data set and was for the purposes of example. This will be developed generally in the future. Also, this was limited to feed-forward neural networks with scalar responses and functional covariates - extensions will be made to the two other types of functional linear models along with a crossover to residual and recurrent neural networks AND neural ordinary differential equations.
+
+
 
 
 
