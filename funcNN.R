@@ -128,7 +128,7 @@ grad_descent <- function(neural_net, nobs, f){
 mean((neuralnet_info$output - annualprec[-35])^2)
 
 ## Epochs
-epoch_num <- 25
+epoch_num <- 10
 
 ## Initializing loss vector
 lossData <- data.frame(epoch = 1:epoch_num, MSE = rep(0, epoch_num))
@@ -195,3 +195,41 @@ test12 <- c(test11*mean(neuralnet_info$layer_weights_2) +
 tested_pred2 <- (test12 - mean(dailydatNew))^2
 
 plot(neuralnet_info$output[-35], neuralnet_info$y - neuralnet_info$output[-35])
+
+
+
+data.frame(yhat = neuralnet_info$output[-35], 
+                             res = neuralnet_info$y - neuralnet_info$output[-35]) %>% 
+  ggplot(aes(x = yhat, y = res)) +
+  geom_point(color = "blue") +
+  geom_hline(yintercept = 0, color = "steelblue2") +
+  theme_bw() +
+  ggtitle("Residual Plot") +
+  xlab("Fitted Values") +
+  ylab("Residuals") +
+  theme(plot.title = element_text(hjust = 0.5))
+  
+
+
+
+#### Plotting coefficient function for the first layer
+final_beta_function <- function(x){
+  value <- 0.9472645 + 0.2540166*sin(365*x) - 0.1838267*cos(365*x) +
+    0.4881373*sin(2*365*x) + 0.4477605*cos(2*365*x) + 0.4955367*sin(3*365*x) +
+    0.4886242*cos(3*365*x) + 0.5034172*sin(4*365*x) + 0.47760322*cos(4*365*x) +
+    0.4931472*sin(5*365*x) + 0.4954288*cos(5*365*x)
+  return(value)
+}
+
+beta_coef <- data.frame(time = seq(1, 365, 15), 
+                        beta_evals = final_beta_function(seq(1, 365, 15)))
+
+beta_coef %>% 
+  ggplot(aes(x = time, y = beta_evals)) +
+  geom_smooth(method = "loess", se = F) +
+  theme_bw() +
+  ggtitle("Coefficient Function") +
+  xlab("Day") +
+  ylab("Beta for Temperature") +
+  theme(plot.title = element_text(hjust = 0.5))
+
