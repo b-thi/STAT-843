@@ -25,3 +25,33 @@ library(fda.usc)
 #------------------------------------------------------------------------------#
 
 set.seed(1994)
+
+#------------------------------------------------------------------------------#
+#                                                                              #
+#  Functions List                                                              #
+#                                                                              #
+#------------------------------------------------------------------------------#
+
+
+# Gaussian Quadrature Function
+# Integral Approximator Function
+# Basis Selector Function
+# Non-Linear Function Maker
+# Forward Pass Function
+# Backpropagation Function
+# Overall FNN Function
+# Diagnostics/Plot Function
+
+#------------------------------------------------------------------------------#
+#                                                                              #
+#  Functions List                                                              #
+#                                                                              #
+#------------------------------------------------------------------------------#
+
+
+
+
+
+
+
+
