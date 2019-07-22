@@ -188,8 +188,59 @@ neural_network <- function(input, num_neurons, nobs) {
 #                                                                              #
 #------------------------------------------------------------------------------#
 
-forward_fnn <- function(neural_net, obs) {
+forward_fnn <- function(neural_net, nobs, neurons, layer, activation_func) {
   
+  if (layer == 1) {
+    result = c()
+    sub_result = c()
+    
+    for (i in 1:nobs) {
+      
+      for (j in 1:neurons[1]) {
+        
+        for (k in 1:number_func) {
+          
+          for (u in 1:num_basis[k]) {
+            
+            sub_result[u] <- fnn_integ_approximator(type_basis[k], u, i)*functional_weights_fnn[[k]][i, u, j]
+            
+          }
+          
+          result = activation_func(sum(sub_result) + 
+                                     scalar_weights_fnn_l1[i, k, j]*scalar_inputs[i] + 
+                                     bias_fnn_l1[i, j])
+          
+        }
+        
+        neural_net$layer1[i, j] = result
+        
+      }
+    }
+  
+  }
+  
+  if (layer != 1) {
+    
+    if (layer == 2){
+      current_layer_activations <- neural_net$layer1
+    } else {
+      current_layer_activations <- nerual_net$layer_output
+    }
+    
+    for (i in 1:nobs) {
+      for (j in 1:neurons[layer]) {
+        for (k in 1:neurons) {
+          
+        }
+        neural_net$layer_result[i, j] = current_laer_activations*
+      }
+    }
+    
+    
+  
+  }
+  
+  return(neural_net)
   
 }
 
@@ -213,7 +264,8 @@ backward_fnn <- function(neural_net, obs) {
 #------------------------------------------------------------------------------#
 
 fnn <- function(layers = 1, neurons = 1, 
-                scalar_inputs, functional_inputs, activation_function,
+                scalar_inputs, functional_inputs, 
+                response, activation_function,
                 basis_type, num_basis, rangeval, norder = 100,
                 epoch_num = 5,
                 datasplit_percent = 10,
@@ -229,13 +281,13 @@ fnn <- function(layers = 1, neurons = 1,
   # it outputs a list including the final model
   
   # Get number of observations
-  number_obs <- 10#nrow(scalar_inputs)
+  number_obs <- 10#nrow(scalar_inputs) ##########
   
-  # Get number of scalar covariates
-  number_scalar <- 3#ncol(scalar_inputs)
+  # Get number of scalar covariates 
+  number_scalar <- 3#ncol(scalar_inputs) ##########
   
   # Number of functional covariates
-  number_func <- 2#ncol(functional_inputs)
+  number_func <- 2#ncol(functional_inputs) ##########
   
   # Initialize weights for the network
   functional_weight_list <- list()
@@ -282,7 +334,7 @@ fnn <- function(layers = 1, neurons = 1,
     }
   }
   
-  # Next, we do the same for bias. Here, for the bias of this first layer
+  # Next, we do the same for bias. Here, for the bias ofx this first layer
   # we basically have a bias for each neuron in the first layer and one
   # for each observation. So, in this first layer, i is the observation and
   # k is the neuron number
@@ -359,23 +411,71 @@ fnn <- function(layers = 1, neurons = 1,
     
   }
   
-  ################### Everything Works Up Until Here ###################
+  ################### Everything Works Up Until Here (1) ###################
+  
+  # Next, we set the response. In this case, it will just come from the user
+  # and we will save it here as "y". This is for scalar responses so this will
+  # be a vector of size = to i, the number observations
+  y = response
+  
+  # Now, we create an empty matrix to store all the responses - this will be
+  # checked with the response above to see whether or not we have a good error
+  # rate or not
+  output = matrix(rep(0, number_obs), ncol = number_obs)
+  
+  # Now, we can create a list which holds all the above information so far in
+  # one nice form. This list has the weights and the predictions in it - this is
+  # essentially the whole network and this list is what will get updated through
+  # out the whole network
+  neuralnet_info <- list(
+    
+    # Input observations
+    #input_functional <- functional_inputs, ##########
+    #input_scalar <- scalar_inputs, ##########
+    
+    # Functional weights - layer 1
+    functional_weights_fnn = functional_weight_list,
+    
+    # Scalar weights - layer 1
+    scalar_weights_fnn_l1 = scalar_weights_1,
+    
+    # Bias - layer 1
+    bias_fnn_l1 = layer1_bias,
+    
+    # Scalar Weights - layer 2 to end
+    scalar_weights_fnn_rest = weights_rest,
+    
+    # Bias - layer 2 to end
+    bias_fnn_rest = bias_rest,
+
+    # Output
+    true_values = y,
+    
+    # Predictions
+    predictions = output
+  )
+  
+  ################### Everything Works Up Until Here (2) ###################
+  
+  # Now, we call the forward pass function so that we can get a pass
+  # of the network before we go back and update the network
   
 
   
   # Creating list to return
-  return_list <- list(functional_weight_list, weights_rest, scalar_weights_1,
-                      layer1_bias, bias_rest)
+  return_list <- list(network = neuralnet_info)
   
   return(return_list)
 }
 
 # testing 1 - this may break
 test = fnn(layers = 3, neurons = c(5, 2, 3), num_basis = c(6, 7))
-test
+test$network$
 
-# testing 2
-
+# testing 2 - this may break
+test = fnn(layers = 3, neurons = c(5, 2, 3), num_basis = c(6, 7), response = c(rep(0, 10)))
+test$network$
+  
 #------------------------------------------------------------------------------#
 #                                                                              #
 # Diagnostics Function                                                         #
@@ -393,24 +493,6 @@ fnn_diagnostics <- function(fnn_object) {
 
 # Now, we create the neural network list - this will be called repeatedly
 # through the network
-neuralnet_info <- list(
-  
-  # Input observations
-  input = temp_fd,
-  
-  #### W_1(t) Weights
-  layer_weights_1 = layer_weights_1,
-  
-  ## Otherweights
-  layer_bias_1 = layer_bias_1,
-  layer_weights_2 = layer_weights_2,
-  layer_bias_2 = layer_bias_2,
-  
-  ## Output
-  y = annualprec[-35],
-  
-  ## Predictions
-  output = matrix(rep(0, 34), ncol = 34)
-)
+
 
 
