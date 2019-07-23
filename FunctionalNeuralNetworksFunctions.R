@@ -18,6 +18,8 @@ library(tidyverse)
 library(fda)
 library(refund)
 library(fda.usc)
+library(stringr)
+library(stringi)
 
 #------------------------------------------------------------------------------#
 #                                                                              #
@@ -289,7 +291,7 @@ fnn_integ_approximator <- function(basis, obs, which_func_obs, func_obs, term,
 fnn_integ_approximator("fourier", 1, 1, temp_fd[1], 6, 7, range_val = c(0, 365), 3, subintervals = 1000)
 
 
-S#------------------------------------------------------------------------------#
+#------------------------------------------------------------------------------#
 #                                                                              #
 #  FNN - Forward Pass                                                          #
 #                                                                              #
