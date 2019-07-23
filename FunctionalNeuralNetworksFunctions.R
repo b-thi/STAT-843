@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------#
 #                                                                              #
 #  June c(28th, 30th), 2019                                                    #
-#  July c(18th, 21st, 22nd), 2019                                              #
+#  July c(18th, 21st, 22nd, 23rd), 2019                                        #
 #                                                                              #
 #  Final Function Code - Functional Neural Networks                            #
 #                                                                              #
